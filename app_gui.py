@@ -1,292 +1,262 @@
-import sqlite3
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import messagebox
+import sqlite3
 
-# -----------------------------
-# DATABASE CONNECTION
-# -----------------------------
+# Connect backend to frontend GUI
+DB_NAME = "barriers.db"
+
 def get_connection():
-    return sqlite3.connect("barriers.db")
+    return sqlite3.connect(DB_NAME)
 
-# -----------------------------
-# QUERY FUNCTIONS
-# -----------------------------
-def run_query(query, params=()):
+def setup_database_and_seed():
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute(query, params)
-    rows = cursor.fetchall()
+    cursor.execute("PRAGMA foreign_keys = ON;")
+
+    # Create Tables
+    cursor.execute("CREATE TABLE IF NOT EXISTS ZipCodes (zip_code TEXT PRIMARY KEY, neighborhood_name TEXT, median_income INTEGER, population INTEGER, income_category TEXT)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS Programs (program_id TEXT PRIMARY KEY, program_name TEXT, program_type TEXT, address TEXT, zip_code TEXT, monthly_cost INTEGER, website TEXT, FOREIGN KEY (zip_code) REFERENCES ZipCodes(zip_code))")
+    cursor.execute("CREATE TABLE IF NOT EXISTS Enrollment (enrollment_id TEXT PRIMARY KEY, program_id TEXT, max_capacity TEXT, current_enrollment TEXT, FOREIGN KEY (program_id) REFERENCES Programs(program_id))")
+    cursor.execute("CREATE TABLE IF NOT EXISTS Reviews (review_id TEXT PRIMARY KEY, program_id TEXT, Google_rating REAL, reviews INTEGER, FOREIGN KEY (program_id) REFERENCES Programs(program_id))")
+    
+    # Seed Data if empty
+    cursor.execute("SELECT count(*) FROM ZipCodes")
+    if cursor.fetchone()[0] == 0:
+        print("Seeding Data...")
+        conn.executemany("INSERT INTO ZipCodes VALUES (?,?,?,?,?)", [
+            ("78258", "Stone Oak", 102000, 40000, "high"), ("78207", "West Side", 28000, 22000, "low"), 
+            ("78203", "Denver Heights", 29000, 7000, "low"), ("78260", "North Central", 112000, 25000, "high")
+        ])
+        conn.executemany("INSERT INTO Programs VALUES (?,?,?,?,?,?,?)", [
+            ("PRG001", "Code Ninjas", "Coding", "Huebner Rd", "78258", 300, "codeninjas.com"),
+            ("PRG002", "YMCA", "After School", "Iowa St", "78203", 89, "ymca.org"),
+            ("PRG003", "Catholic Charities", "Support", "Cesar Chavez", "78207", 0, "ccaosa.org")
+        ])
+        conn.executemany("INSERT INTO Enrollment VALUES (?,?,?,?)", [
+            ("ENR001", "PRG001", "NO", "IMMEDIATELY"), ("ENR002", "PRG002", "NO", "IMMEDIATELY"), 
+            ("ENR003", "PRG003", "YES", "WAITLIST")
+        ])
+        conn.executemany("INSERT INTO Reviews VALUES (?,?,?,?)", [
+            ("REV001", "PRG001", 5.0, 63), ("REV002", "PRG002", 4.4, 447), ("REV003", "PRG003", 4.3, 255)
+        ])
+        conn.commit()
     conn.close()
-    return rows
 
-# -----------------------------
-# GUI APP
-# -----------------------------
-class App:
-    def __init__(self, root):
-        self.root = root
-        root.title("Afterschool Program Database")
-        root.geometry("900x600")
+setup_database_and_seed()
 
-        title = tk.Label(root, text="Afterschool Program Database",
-                         font=("Arial", 20, "bold"))
-        title.pack(pady=10)
+# UI logic
 
-        # Tabs
-        tab_control = ttk.Notebook(root)
-        self.tab_programs = ttk.Frame(tab_control)
-        self.tab_enrollment = ttk.Frame(tab_control)
-        self.tab_queries = ttk.Frame(tab_control)
+def make_a_popup(popup_title, popup_instruction, field_labels, db_function):
+    # Dynamically creates a popup with input fields based on the list of labels provided.
+    
+    popup = tk.Tk()
+    popup.title(popup_title)
+    
+    # Dynamic height based on number of fields (keeps it looking good)
+    window_height = 150 + (len(field_labels) * 50)
+    popup.geometry(f"600x{window_height}")
+    
+    # Title Label
+    tk.Label(popup, text=popup_instruction, font=("Arial", 12, "bold")).pack(pady=15)
 
-        tab_control.add(self.tab_programs, text="Programs CRUD")
-        tab_control.add(self.tab_enrollment, text="Enrollment CRUD")
-        tab_control.add(self.tab_queries, text="Queries")
-        tab_control.pack(expand=1, fill="both")
+    # List to store our entry widgets so we can get data from them later
+    entry_widgets = []
 
-        # Load sections
-        self.setup_programs_tab()
-        self.setup_enrollment_tab()
-        self.setup_queries_tab()
+    # The loop: This replaces the hardcoded A-M variables. 
+    for label_text in field_labels:
+        tk.Label(popup, text=label_text).pack()
+        entry_var = tk.StringVar()
+        entry = tk.Entry(popup, width=60, textvariable=entry_var)
+        entry.pack(pady=2)
+        entry_widgets.append(entry_var)
 
-    # =============================================
-    # PROGRAMS CRUD TAB
-    # =============================================
-    def setup_programs_tab(self):
-        frame = self.tab_programs
+    def on_save_click():
+        # Gather all data from the boxes into a simple list
+        user_inputs = [e.get() for e in entry_widgets]
+        
+        try:
+            # Run the specific database function
+            result_text = db_function(user_inputs)
+            
+            # Display output in main window
+            output_box.delete(1.0, tk.END)
+            output_box.insert(tk.END, str(result_text))
+            
+            messagebox.showinfo("Success", "Operation Successful")
+            popup.destroy()
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
 
-        # Input fields
-        tk.Label(frame, text="Program Name").grid(row=0, column=0)
-        tk.Label(frame, text="Type").grid(row=1, column=0)
-        tk.Label(frame, text="Address").grid(row=2, column=0)
-        tk.Label(frame, text="Zip Code").grid(row=3, column=0)
-        tk.Label(frame, text="Monthly Cost").grid(row=4, column=0)
-        tk.Label(frame, text="Website").grid(row=5, column=0)
-
-        self.p_name = tk.Entry(frame)
-        self.p_type = tk.Entry(frame)
-        self.p_addr = tk.Entry(frame)
-        self.p_zip = tk.Entry(frame)
-        self.p_cost = tk.Entry(frame)
-        self.p_web = tk.Entry(frame)
-
-        self.p_name.grid(row=0, column=1)
-        self.p_type.grid(row=1, column=1)
-        self.p_addr.grid(row=2, column=1)
-        self.p_zip.grid(row=3, column=1)
-        self.p_cost.grid(row=4, column=1)
-        self.p_web.grid(row=5, column=1)
-
-        # Buttons
-        tk.Button(frame, text="Add Program", command=self.add_program).grid(row=6, column=0, pady=10)
-        tk.Button(frame, text="Update Program", command=self.update_program).grid(row=6, column=1)
-        tk.Button(frame, text="Delete Program", command=self.delete_program).grid(row=6, column=2)
-        tk.Button(frame, text="Refresh Table", command=self.load_programs).grid(row=6, column=3)
-
-        # Table
-        columns = ("ID", "Name", "Type", "Address", "Zip", "Cost", "Website")
-        self.program_table = ttk.Treeview(frame, columns=columns, show="headings")
-        for col in columns:
-            self.program_table.heading(col, text=col)
-        self.program_table.grid(row=7, column=0, columnspan=4, sticky="nsew")
-
-        self.load_programs()
-
-    def add_program(self):
-        query = """
-        INSERT INTO Programs (program_name, program_type, address, zip_code, monthly_cost, website)
-        VALUES (?, ?, ?, ?, ?, ?)
-        """
-        params = (
-            self.p_name.get(), self.p_type.get(), self.p_addr.get(),
-            self.p_zip.get(), self.p_cost.get(), self.p_web.get()
-        )
-        run_query(query, params)
-        messagebox.showinfo("Success", "Program added!")
-        self.load_programs()
-
-    def update_program(self):
-        selected = self.program_table.selection()
-        if not selected:
-            return messagebox.showerror("Error", "Select a program first")
-
-        program_id = self.program_table.item(selected[0])['values'][0]
-
-        query = """
-        UPDATE Programs SET program_name=?, program_type=?, address=?, zip_code=?, monthly_cost=?, website=?
-        WHERE program_id=?
-        """
-        params = (
-            self.p_name.get(), self.p_type.get(), self.p_addr.get(),
-            self.p_zip.get(), self.p_cost.get(), self.p_web.get(),
-            program_id
-        )
-        run_query(query, params)
-        messagebox.showinfo("Updated", "Program updated!")
-        self.load_programs()
-
-    def delete_program(self):
-        selected = self.program_table.selection()
-        if not selected:
-            return messagebox.showerror("Error", "Select a program first")
-
-        program_id = self.program_table.item(selected[0])['values'][0]
-        run_query("DELETE FROM Programs WHERE program_id=?", (program_id,))
-        messagebox.showinfo("Deleted", "Program deleted!")
-        self.load_programs()
-
-    def load_programs(self):
-        for row in self.program_table.get_children():
-            self.program_table.delete(row)
-
-        rows = run_query("SELECT * FROM Programs")
-        for r in rows:
-            self.program_table.insert("", "end", values=r)
-
-    # =============================================
-    # ENROLLMENT CRUD TAB
-    # =============================================
-    def setup_enrollment_tab(self):
-        frame = self.tab_enrollment
-
-        tk.Label(frame, text="Program ID").grid(row=0, column=0)
-        tk.Label(frame, text="Student Name").grid(row=1, column=0)
-        tk.Label(frame, text="Date Enrolled").grid(row=2, column=0)
-        tk.Label(frame, text="Status").grid(row=3, column=0)
-
-        self.e_pid = tk.Entry(frame)
-        self.e_name = tk.Entry(frame)
-        self.e_date = tk.Entry(frame)
-        self.e_status = tk.Entry(frame)
-
-        self.e_pid.grid(row=0, column=1)
-        self.e_name.grid(row=1, column=1)
-        self.e_date.grid(row=2, column=1)
-        self.e_status.grid(row=3, column=1)
-
-        tk.Button(frame, text="Add Enrollment", command=self.add_enrollment).grid(row=4, column=0, pady=10)
-        tk.Button(frame, text="Update Enrollment", command=self.update_enroll).grid(row=4, column=1)
-        tk.Button(frame, text="Delete Enrollment", command=self.delete_enroll).grid(row=4, column=2)
-        tk.Button(frame, text="Refresh Table", command=self.load_enrollments).grid(row=4, column=3)
-
-        columns = ("ID", "Program", "Name", "Date", "Status")
-        self.enroll_table = ttk.Treeview(frame, columns=columns, show="headings")
-        for col in columns:
-            self.enroll_table.heading(col, text=col)
-        self.enroll_table.grid(row=5, column=0, columnspan=4, sticky="nsew")
-
-        self.load_enrollments()
-
-    def add_enrollment(self):
-        query = """
-        INSERT INTO Enrollment (program_id, student_name, date_enrolled, status)
-        VALUES (?, ?, ?, ?)
-        """
-        params = (
-            self.e_pid.get(), self.e_name.get(), self.e_date.get(), self.e_status.get()
-        )
-        run_query(query, params)
-        messagebox.showinfo("Success", "Enrollment added!")
-        self.load_enrollments()
-
-    def update_enroll(self):
-        selected = self.enroll_table.selection()
-        if not selected:
-            return messagebox.showerror("Error", "Select a row")
-
-        enrollment_id = self.enroll_table.item(selected[0])['values'][0]
-
-        query = """
-        UPDATE Enrollment SET program_id=?, student_name=?, date_enrolled=?, status=?
-        WHERE enrollment_id=?
-        """
-        params = (
-            self.e_pid.get(), self.e_name.get(), self.e_date.get(),
-            self.e_status.get(), enrollment_id
-        )
-        run_query(query, params)
-        messagebox.showinfo("Updated", "Enrollment updated!")
-        self.load_enrollments()
-
-    def delete_enroll(self):
-        selected = self.enroll_table.selection()
-        if not selected:
-            return messagebox.showerror("Error", "Select a row")
-
-        enrollment_id = self.enroll_table.item(selected[0])['values'][0]
-        run_query("DELETE FROM Enrollment WHERE enrollment_id=?", (enrollment_id,))
-        messagebox.showinfo("Deleted", "Enrollment removed!")
-        self.load_enrollments()
-
-    def load_enrollments(self):
-        for row in self.enroll_table.get_children():
-            self.enroll_table.delete(row)
-
-        rows = run_query("SELECT * FROM Enrollment")
-        for r in rows:
-            self.enroll_table.insert("", "end", values=r)
-
-    # =============================================
-    # QUERIES TAB
-    # =============================================
-    def setup_queries_tab(self):
-        frame = self.tab_queries
-
-        tk.Label(frame, text="Analytical Queries", font=("Arial", 16, "bold")).pack(pady=10)
-
-        tk.Button(frame, text="Programs in Low-Income ZIPs", width=40,
-                  command=self.show_low_income_programs).pack(pady=5)
-
-        tk.Button(frame, text="Average Cost by ZIP", width=40,
-                  command=self.show_avg_cost).pack(pady=5)
-
-        tk.Button(frame, text="Program Count by ZIP", width=40,
-                  command=self.show_program_count).pack(pady=5)
-
-        tk.Button(frame, text="Enrollment + Program Info", width=40,
-                  command=self.show_enroll_programs).pack
-
-    # =============================================
-    # QUERY FUNCTIONS
-    # =============================================
-
-    def show_low_income_programs(self):
-        result = run_query("""
-        SELECT program_name, zip_code 
-        FROM Programs 
-        WHERE zip_code IN ('78202','78203','78207','78237')
-        """)
-        messagebox.showinfo("Low Income Programs", str(result))
-
-    def show_avg_cost(self):
-        result = run_query("""
-        SELECT zip_code, AVG(monthly_cost)
-        FROM Programs
-        GROUP BY zip_code
-        """)
-        messagebox.showinfo("Average Cost by ZIP", str(result))
-
-    def show_program_count(self):
-        result = run_query("""
-        SELECT zip_code, COUNT(*)
-        FROM Programs
-        GROUP BY zip_code
-        """)
-        messagebox.showinfo("Program Count by ZIP", str(result))
-
-    def show_enroll_programs(self):
-        result = run_query("""
-        SELECT Enrollment.student_name, Programs.program_name, Enrollment.status
-        FROM Enrollment
-        JOIN Programs ON Enrollment.program_id = Programs.program_id
-        """)
-        messagebox.showinfo("Enrollment + Program Info", str(result))
+    save_button = tk.Button(popup, text="EXECUTE", bg="#e0e0e0", width=20, command=on_save_click)
+    save_button.pack(pady=20)
+    
+    popup.mainloop()
 
 
-# =============================================
-# START THE APPLICATION
-# =============================================
+# Button functions for CRUD operations
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = App(root)
-    root.mainloop()
+def pressed_create():
+    # We only list the 7 fields we actually need. No empty strings!
+    fields = ["Program ID", "Name", "Type", "Address", "Zip Code", "Cost", "Website"]
+    
+    def logic(vals):
+        conn = get_connection()
+        conn.execute("INSERT INTO Programs VALUES (?,?,?,?,?,?,?)", vals)
+        conn.commit()
+        conn.close()
+        return f"Created Program: {vals[1]}"
+
+    make_a_popup("CREATE", "Enter New Program Details:", fields, logic)
+
+def pressed_read():
+    fields = ["Enter Zip Code to Search"]
+    
+    def logic(vals):
+        conn = get_connection()
+        cursor = conn.execute("SELECT program_name, monthly_cost FROM Programs WHERE zip_code = ?", (vals[0],))
+        rows = cursor.fetchall()
+        conn.close()
+        return "Programs Found:\n" + "\n".join([str(r) for r in rows])
+
+    make_a_popup("READ", "Search by Zip Code:", fields, logic)
+
+def pressed_update():
+    fields = ["Program ID to Update", "New Monthly Cost"]
+    
+    def logic(vals):
+        conn = get_connection()
+        conn.execute("UPDATE Programs SET monthly_cost = ? WHERE program_id = ?", (vals[1], vals[0]))
+        conn.commit()
+        conn.close()
+        return f"Updated Program {vals[0]} cost to ${vals[1]}"
+
+    make_a_popup("UPDATE", "Update Program Cost:", fields, logic)
+
+def pressed_delete():
+    fields = ["Program ID to Delete"]
+    
+    def logic(vals):
+        conn = get_connection()
+        conn.execute("DELETE FROM Programs WHERE program_id = ?", (vals[0],))
+        conn.commit()
+        conn.close()
+        return f"Deleted Program {vals[0]}"
+
+    make_a_popup("DELETE", "Delete Program Record:", fields, logic)
+
+def pressed_custom_query():
+    fields = ["Enter SQL Query"]
+    
+    def logic(vals):
+        conn = get_connection()
+        cursor = conn.execute(vals[0])
+        rows = cursor.fetchall()
+        conn.commit()
+        conn.close()
+        return rows
+
+    make_a_popup("CUSTOM SQL", "Run Manual Database Query:", fields, logic)
+
+# Query functions for analytics
+
+def query_income_barrier():
+    fields = ["Enter Income Level ('high' or 'low')"]
+    
+    def logic(vals):
+        conn = get_connection()
+        sql = """SELECT p.program_name, p.monthly_cost, z.income_category 
+                 FROM Programs p JOIN ZipCodes z ON p.zip_code = z.zip_code 
+                 WHERE z.income_category = ?"""
+        cursor = conn.execute(sql, (vals[0],))
+        rows = cursor.fetchall()
+        conn.close()
+        return "INCOME ANALYSIS RESULTS:\n" + "\n".join([f"{r[0]} (${r[1]}) - {r[2]}" for r in rows])
+
+    make_a_popup("INCOME BARRIER", "Find Programs by Area Income:", fields, logic)
+
+def query_budget_limit():
+    fields = ["Max Monthly Budget ($)"]
+    
+    def logic(vals):
+        conn = get_connection()
+        sql = "SELECT program_name, monthly_cost FROM Programs WHERE monthly_cost <= ?"
+        cursor = conn.execute(sql, (vals[0],))
+        rows = cursor.fetchall()
+        conn.close()
+        return "BUDGET SEARCH RESULTS:\n" + "\n".join([f"{r[0]} - ${r[1]}" for r in rows])
+
+    make_a_popup("BUDGET SEARCH", "Find Affordable Programs:", fields, logic)
+
+def query_quality_ratings():
+    fields = ["Minimum Star Rating (1-5)"]
+    
+    def logic(vals):
+        conn = get_connection()
+        sql = """SELECT p.program_name, r.Google_rating FROM Programs p 
+                 JOIN Reviews r ON p.program_id = r.program_id 
+                 WHERE r.Google_rating >= ?"""
+        cursor = conn.execute(sql, (vals[0],))
+        rows = cursor.fetchall()
+        conn.close()
+        return "HIGH QUALITY RESULTS:\n" + "\n".join([f"{r[0]} - {r[1]} Stars" for r in rows])
+
+    make_a_popup("QUALITY FILTER", "Search by Rating:", fields, logic)
+
+def query_waitlist_status():
+    fields = ["Check Status (e.g. WAITLIST)"]
+    
+    def logic(vals):
+        conn = get_connection()
+        sql = """SELECT p.program_name, e.current_enrollment FROM Enrollment e 
+                 JOIN Programs p ON e.program_id = p.program_id 
+                 WHERE e.current_enrollment = ?"""
+        cursor = conn.execute(sql, (vals[0],))
+        rows = cursor.fetchall()
+        conn.close()
+        return "AVAILABILITY RESULTS:\n" + "\n".join([f"{r[0]} is {r[1]}" for r in rows])
+
+    make_a_popup("WAITLIST CHECK", "Check Program Availability:", fields, logic)
+
+def query_zip_search():
+    fields = ["Enter Zip Code"]
+    
+    def logic(vals):
+        conn = get_connection()
+        sql = "SELECT program_name, address FROM Programs WHERE zip_code = ?"
+        cursor = conn.execute(sql, (vals[0],))
+        rows = cursor.fetchall()
+        conn.close()
+        return "GEOGRAPHIC RESULTS:\n" + "\n".join([f"{r[0]} at {r[1]}" for r in rows])
+
+    make_a_popup("GEO SEARCH", "Search Programs by Location:", fields, logic)
+
+
+# Button functions for main window layout
+window = tk.Tk()
+window.title("BREAKING BARRIERS: DATABASE PROJECT")
+window.geometry("1000x650")
+
+tk.Label(window, text="BREAKING BARRIERS DATABASE SYSTEM", font=("Arial", 18, "bold")).place(x=20, y=10)
+
+# CRUD section
+tk.Label(window, text="MANAGE RECORDS", font=("Arial", 10, "bold"), fg="#555").place(x=20, y=50)
+tk.Button(window, text="CREATE (Add Program)", width=30, command=pressed_create).place(x=20, y=80)
+tk.Button(window, text="READ (Search by Zip)", width=30, command=pressed_read).place(x=20, y=120)
+tk.Button(window, text="UPDATE (Modify Cost)", width=30, command=pressed_update).place(x=20, y=160)
+tk.Button(window, text="DELETE (Remove Program)", width=30, command=pressed_delete).place(x=20, y=200)
+tk.Button(window, text="CUSTOM SQL QUERY", width=30, command=pressed_custom_query).place(x=20, y=240)
+
+# Analytics section
+tk.Label(window, text="ANALYTICAL QUERIES", font=("Arial", 10, "bold"), fg="#555").place(x=20, y=290)
+tk.Button(window, text="1. Income Barrier Analysis", width=30, command=query_income_barrier).place(x=20, y=320)
+tk.Button(window, text="2. Budget Search", width=30, command=query_budget_limit).place(x=20, y=360)
+tk.Button(window, text="3. Quality/Ratings Filter", width=30, command=query_quality_ratings).place(x=20, y=400)
+tk.Button(window, text="4. Waitlist Availability Check", width=30, command=query_waitlist_status).place(x=20, y=440)
+tk.Button(window, text="5. Geographic Search", width=30, command=query_zip_search).place(x=20, y=480)
+
+# Output box
+tk.Label(window, text="DATABASE RESULTS:", font=("Arial", 10, "bold")).place(x=300, y=50)
+output_box = tk.Text(window, width=80, height=32, bg="#f0f0f0", borderwidth=2, relief="sunken")
+output_box.place(x=300, y=80)
+
+window.mainloop()
