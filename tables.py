@@ -15,10 +15,10 @@ CREATE TABLE IF NOT EXISTS ZipCodes (
 );
 """)
 
-# 2. PROGRAMS TABLE
+# 2. PROGRAMS TABLE - program_id as TEXT (PRG001, PRG002, etc.)
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS Programs (
-    program_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    program_id TEXT PRIMARY KEY,
     program_name TEXT NOT NULL,
     program_type TEXT,
     address TEXT,
@@ -29,26 +29,26 @@ CREATE TABLE IF NOT EXISTS Programs (
 );
 """)
 
-# 3. ENROLLMENT TABLE
+# 3. ENROLLMENT TABLE - enrollment_id as TEXT (ENR001, ENR002, etc.)
+# Connected to program_id via foreign key
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS Enrollment (
-    enrollment_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    program_id INTEGER NOT NULL,
-    student_name TEXT,
-    date_enrolled TEXT,
-    status TEXT,
+    enrollment_id TEXT PRIMARY KEY,
+    program_id TEXT NOT NULL,
+    max_capacity TEXT,
+    current_enrollment TEXT,
     FOREIGN KEY (program_id) REFERENCES Programs(program_id)
 );
 """)
 
-# 4. REVIEWS TABLE
+# 4. REVIEWS TABLE - review_id as TEXT (REV001, REV002, etc.)
+# Connected to program_id via foreign key
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS Reviews (
-    review_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    program_id INTEGER NOT NULL,
-    rating INTEGER,
-    comment TEXT,
-    date TEXT,
+    review_id TEXT PRIMARY KEY,
+    program_id TEXT NOT NULL,
+    Google_rating REAL,
+    reviews INTEGER,
     FOREIGN KEY (program_id) REFERENCES Programs(program_id)
 );
 """)

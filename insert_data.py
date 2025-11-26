@@ -10,11 +10,13 @@ cursor = conn.cursor()
 # INSERT ZIP CODE DATA
 # ---------------------------
 zip_data = [
-    ("78258", "Stone Oak", 102000, 40000, "high"),
+    ("78258", "Stone_Oak", 102000, 40000, "high"),
     ("78260", "Stone Oak", 112000, 25000, "high"),
-    ("78220", "Eastwood Village", 30000, 16000, "low"),
-    ("78203", "Denver Heights", 27000, 13000, "low"),
-    ("78202", "Dignowity Hill", 32000, 15000, "low")
+    ("78220", "eastwood Village", 30000, 16000, "low"),
+    ("78204", "Southtown", 34000, 37000, "low"),
+    ("78203", "Denver Heights", 29000, 7000, "low"),
+    ("78207", "southcentral SA", 40000, 22000, "low"),
+    ("78226", "southwest side SA", 32000, 8000, "low")
 ]
 
 cursor.executemany("""
@@ -25,49 +27,75 @@ VALUES (?, ?, ?, ?, ?)
 print("✔ ZIP code data inserted")
 
 # ---------------------------
-# INSERT PROGRAM DATA
+# INSERT PROGRAM DATA (All 12 programs with PRG001, PRG002, etc.)
 # ---------------------------
 program_data = [
-    ("Code Ninjas", "Coding", "19179 Blanco Rd, San Antonio, TX", "78258", 180, "https://www.codeninjas.com"),
-    ("Kumon Math & Reading", "Tutoring", "26108 Overlook Pkwy, San Antonio, TX", "78260", 175, "https://www.kumon.com"),
-    ("Ivy Kids", "Childcare", "24278 Wilderness Oak, San Antonio, TX", "78258", 260, "https://www.ivykids.com"),
-    ("YMCA Youth Program", "Sports/After School", "21654 Blanco Rd, San Antonio, TX", "78260", 95, "https://www.ymcasatx.org")
+    ("PRG001", "Code_ninjas", "Coding", "20322 Huebr, San Antonio, TX", "78258", 300, "Coding For Kids in"),
+    ("PRG002", "ADC's best afterscho", "After School", "26108 Overlo, San Antonio, TX", "78260", 325, "The Best After Sch"),
+    ("PRG003", "edQuisitive_montess", "Montessori", "22215 Wilde, San Antonio, TX", "78258", 155, "After School Prog"),
+    ("PRG004", "IVY_kids ELC", "Childcare", "24278 Wilde, San Antonio, TX", "78258", None, "Preschool and Da"),
+    ("PRG005", "Kin", "After School", "various, San Antonio, TX", "78258", 270, "Kids Involvement"),
+    ("PRG006", "Kumon", "Tutoring", "19239 Stone, San Antonio, TX", "78258", 175, "After School Math"),
+    ("PRG007", "Youth_Movement_art", "Arts/Athletics", "510 S. Braun, San Antonio, TX", "78203", None, "HOME | Youth Mo"),
+    ("PRG008", "New_Kids_On_The_BI", "After School", "623 S WW W, San Antonio, TX", "78220", 140, "New Kids On The"),
+    ("PRG009", "Boys_&_Girls_club", "After School", "123 Ralph Av, San Antonio, TX", "78204", 150, "https://begreatsa"),
+    ("PRG010", "YMCA", "After School", "1213 lowa St, San Antonio, TX", "78203", 89, "After School | YM"),
+    ("PRG011", "Chatolic Charities aft", "After School", "1801 w. Cesa, San Antonio, TX", "78207", 0, "After School Prog"),
+    ("PRG012", "After School Chanller", "After School", "various, San Antonio, TX", "78226", 260, "After School Chal")
 ]
 
 cursor.executemany("""
-INSERT INTO Programs (program_name, program_type, address, zip_code, monthly_cost, website)
-VALUES (?, ?, ?, ?, ?, ?)
+INSERT INTO Programs (program_id, program_name, program_type, address, zip_code, monthly_cost, website)
+VALUES (?, ?, ?, ?, ?, ?, ?)
 """, program_data)
 
 print("✔ Program data inserted")
 
 # ---------------------------
-# INSERT ENROLLMENT DATA
+# INSERT ENROLLMENT DATA (ENR001, ENR002, etc. connected to PRG001, PRG002, etc.)
 # ---------------------------
 enrollment_data = [
-    (1, "John Doe", "2024-11-01", "active"),
-    (2, "Maria Lopez", "2024-10-20", "active"),
-    (3, "Kevin Smith", "2024-09-15", "inactive")
+    ("ENR001", "PRG001", "NO", "IMMEDIATELY"),
+    ("ENR002", "PRG002", "NO", "IMMEDIATELY"),
+    ("ENR003", "PRG003", "NO", "IMMEDIATELY"),
+    ("ENR004", "PRG004", "NO", "IMMEDIATELY"),
+    ("ENR005", "PRG005", "NO", "IMMEDIATELY"),
+    ("ENR006", "PRG006", "NO", "IMMEDIATELY"),
+    ("ENR007", "PRG007", "YES", "WAITLIST"),
+    ("ENR008", "PRG008", "YES", "WAITLIST"),
+    ("ENR009", "PRG009", "NO", "IMMEDIATELY"),
+    ("ENR010", "PRG010", "NO", "IMMEDIATELY"),
+    ("ENR011", "PRG011", "NO", "IMMEDIATELY"),
+    ("ENR012", "PRG012", "NO", "IMMEDIATELY")
 ]
 
 cursor.executemany("""
-INSERT INTO Enrollment (program_id, student_name, date_enrolled, status)
+INSERT INTO Enrollment (enrollment_id, program_id, max_capacity, current_enrollment)
 VALUES (?, ?, ?, ?)
 """, enrollment_data)
 
 print("✔ Enrollment data inserted")
 
 # ---------------------------
-# INSERT REVIEW DATA
+# INSERT REVIEW DATA (REV001, REV002, etc. connected to PRG001, PRG002, etc.)
 # ---------------------------
 review_data = [
-    (1, 5, "Great program! My son learned to code.", "2024-11-20"),
-    (2, 4, "Helpful tutoring but expensive.", "2024-10-22"),
-    (3, 5, "Amazing childcare and activities!", "2024-11-10")
+    ("REV001", "PRG001", 5.0, 63),
+    ("REV002", "PRG002", 4.7, 43),
+    ("REV003", "PRG003", 4.1, 13),
+    ("REV004", "PRG004", 5.0, 6),
+    ("REV005", "PRG005", 4.3, 9),
+    ("REV006", "PRG006", 4.6, 16),
+    ("REV007", "PRG007", 4.8, 4),
+    ("REV008", "PRG008", 4.6, 10),
+    ("REV009", "PRG009", 4.6, 94),
+    ("REV010", "PRG010", 4.4, 447),
+    ("REV011", "PRG011", 4.3, 255),
+    ("REV012", "PRG012", None, None)  # N/A values
 ]
 
 cursor.executemany("""
-INSERT INTO Reviews (program_id, rating, comment, date)
+INSERT INTO Reviews (review_id, program_id, Google_rating, reviews)
 VALUES (?, ?, ?, ?)
 """, review_data)
 
