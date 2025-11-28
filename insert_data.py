@@ -45,7 +45,7 @@ program_data = [
 ]
 
 cursor.executemany("""
-INSERT INTO Programs (program_id, program_name, program_type, address, zip_code, monthly_cost, website)
+INSERT OR IGNORE INTO Programs (program_id, program_name, program_type, address, zip_code, monthly_cost, website)
 VALUES (?, ?, ?, ?, ?, ?, ?)
 """, program_data)
 
@@ -70,7 +70,7 @@ enrollment_data = [
 ]
 
 cursor.executemany("""
-INSERT INTO Enrollment (enrollment_id, program_id, max_capacity, current_enrollment)
+INSERT OR IGNORE INTO Enrollment (enrollment_id, program_id, max_capacity, current_enrollment)
 VALUES (?, ?, ?, ?)
 """, enrollment_data)
 
@@ -95,7 +95,7 @@ review_data = [
 ]
 
 cursor.executemany("""
-INSERT INTO Reviews (review_id, program_id, Google_rating, reviews)
+INSERT OR IGNORE INTO Reviews (review_id, program_id, Google_rating, reviews)
 VALUES (?, ?, ?, ?)
 """, review_data)
 
