@@ -40,3 +40,43 @@ The system includes:
 - Full CRUD operations for each table
 - Five analytical queries
 - Auto-inserted real after-school program data
+
+DATABASE STRUCTURE
+-------------------------------------
+The system uses four linked tables with foreign keys:
+
+1. ZipCodes Table
+  Stores neighborhood-level data.
+
+- zip_code (PRIMARY KEY)
+- neighborhood_name
+- median_income
+- population
+- income_category (“high” or “low”)
+
+2. Programs Table
+   Stores all after-school program information.
+   
+- program_id (PRIMARY KEY)
+- program_name
+- program_type
+- address
+- zip_code (FOREIGN KEY → ZipCodes)
+- monthly_cost
+- website
+
+3. Enrollment Table
+  Tracks capacity and availability.
+
+- enrollment_id (PRIMARY KEY)
+- program_id (FOREIGN KEY → Programs)
+- max_capacity
+- current_enrollment (“IMMEDIATELY” or “WAITLIST”)
+
+4. Reviews Table
+  Stores quality ratings.
+
+- review_id (PRIMARY KEY)
+- program_id (FOREIGN KEY → Programs)
+- Google_rating
+- reviews
