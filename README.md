@@ -1,3 +1,12 @@
+TEAM MEMBERS
+-------------------------------------
+1. Annmarie Kongglang
+2. 
+-------------------------------------
+
+
+
+
 PROJECT SUMMARY 
 -------------------------------------
 Breaking Barriers is a Python + SQLite system designed to analyze accessibility gaps in after-school programs across San Antonio. Families face challenges finding programs due to scattered information, inconsistent quality, and limited availability.
@@ -219,4 +228,21 @@ Database Layer (SQLite):
 
 Output Layer:
   Results appear in a scrollable text box in the GUI
+
+Professors expect this because it shows planning, scalability, and understanding.
+
+FUTURE ENHANCEMENTS
+-------------------------------------
+Professors expect this because it shows planning, scalability, and understanding.
+Possible improvements for future versions:
+
+  - Add interactive charts/graphs for data visualization
+  - Add program filters by type (STEM, tutoring, arts, sports, etc.)
+  - Add map-based location view for each program
+  - Integrate Google Maps API
+  - Add CSV import/export functionality
+  - Improve GUI design using ttk themes
+  - Add an admin login system for data protection
+  - Add report generation (PDF/CSV) for community leaders
+  - Add data cleaning and address standardization
 
