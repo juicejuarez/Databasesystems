@@ -80,3 +80,72 @@ The system uses four linked tables with foreign keys:
 - program_id (FOREIGN KEY → Programs)
 - Google_rating
 - reviews
+
+CRUD FUNCTIONALITY
+-------------------------------------
+
+The application supports full Create, Read, Update, and Delete operations for every table.
+
+Programs CRUD
+
+- Add new program
+- View all programs
+- Update monthly cost
+- Delete program
+
+Zip Code CRUD
+
+- Add new ZIP code
+- View all ZIP records
+- Update population
+- Delete ZIP code
+    - Protected by foreign keys (cannot delete if programs exist)
+
+Enrollment CRUD
+
+- Add enrollment details
+- Update availability status
+- Delete enrollment entry
+
+Reviews CRUD
+
+- Add reviews
+- Update star rating or review count
+- Delete review
+
+ANALYTICAL QUERIES
+-------------------------------------
+
+The system includes five SQL-based analytical queries for meaningful insights.
+
+1. Income Barrier Analysis
+
+- Finds programs in high-income or low-income ZIP codes
+- Helps identify affordability gaps
+
+2. Budget-Friendly Program Search
+
+- Filters programs based on a maximum cost entered by the user
+
+3. Quality / Rating Filter
+
+- Displays programs with Google ratings greater than or equal to the user’s input
+
+4. Waitlist Availability Check
+
+- Shows programs that are:
+
+      - WAITLIST ONLY, or
+  
+      - IMMEDIATELY AVAILABLE
+
+5. Geographic ZIP Code Search
+
+- Lists all programs in a specific ZIP code
+- Highlights underserved areas
+
+
+
+
+
+
