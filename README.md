@@ -162,14 +162,15 @@ Project Files + Folder Structure
 Why needed: Shows organization and professionalism.
 
 PROJECT FILES
-File	Description
-app_gui.py	Main Tkinter application (CRUD + queries)
-setup_database.py	Creates SQLite tables
-insert_data.py	Inserts real ZIP codes, programs, enrollment & reviews
-queries.py	Contains all SQL analytical functions
-test_crud.py	Automated CRUD test file
-barriers.db	SQLite database file
 
+| File               | Description                                      |
+|--------------------|--------------------------------------------------|
+| `app_gui.py`       | Main Tkinter application (CRUD + queries)        |
+| `setup_database.py`| Creates SQLite tables                            |
+| `insert_data.py`   | Inserts real ZIP codes, programs, enrollment & reviews |
+| `queries.py`       | Contains all SQL analytical functions            |
+| `test_crud.py`     | Automated CRUD test file                         |
+| `barriers.db`      | SQLite database file                             |
 
 
 
