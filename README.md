@@ -1,7 +1,9 @@
 TEAM MEMBERS
 -------------------------------------
 1. Annmarie Kongglang
-2. 
+2. Amber Parker
+3. Hugo Juarez Gurrola
+4. Chris Guerra
 -------------------------------------
 
 
