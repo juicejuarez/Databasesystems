@@ -135,9 +135,8 @@ The system includes five SQL-based analytical queries for meaningful insights.
 
 - Shows programs that are:
 
-      - WAITLIST ONLY, or
-  
-      - IMMEDIATELY AVAILABLE
+    - WAITLIST ONLY, or
+    - IMMEDIATELY AVAILABLE
 
 5. Geographic ZIP Code Search
 
