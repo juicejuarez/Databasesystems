@@ -143,6 +143,20 @@ The system includes five SQL-based analytical queries for meaningful insights.
 - Lists all programs in a specific ZIP code
 - Highlights underserved areas
 
+HOW RO RUN THE PROJECT
+-------------------------------------
+**1. Install Python 3.x**
+
+Tkinter and SQLite come pre-installed with Python.
+
+**2. Run the application**
+python app_gui.py
+The GUI will open with full CRUD and query options.
+
+**3. Database Creation**
+
+If barriers.db does not exist, it will be created automatically the first time the program is run.
+
 
 
 
