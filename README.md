@@ -143,7 +143,7 @@ The system includes five SQL-based analytical queries for meaningful insights.
 - Lists all programs in a specific ZIP code
 - Highlights underserved areas
 
-HOW RO RUN THE PROJECT
+HOW TO RUN THE PROJECT
 -------------------------------------
 **1. Install Python 3.x**
 
@@ -202,5 +202,21 @@ The Tkinter interface includes:
 Output Display Section
   - All results appear in the large text window on the right side
 
+HOW THE SYSTEM WORKS
+-------------------------------------
 
+The application follows a clear architecture:
+
+GUI Layer (Tkinter):
+  Buttons → popup forms → triggers backend functions
+
+Logic Layer:
+  Each button runs a function that executes SQL operations (CRUD or query)
+
+Database Layer (SQLite):
+  Four linked tables with foreign-key relationships
+  Ensures data accuracy and prevents orphan records
+
+Output Layer:
+  Results appear in a scrollable text box in the GUI
 
