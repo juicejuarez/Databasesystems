@@ -1,4 +1,5 @@
 **Breaking Barriers: After-School Program Database System **
+
 This project is a Python + SQLite database application designed to help identify barriers to accessing after-school programs across different neighborhoods. The system analyzes factors such as monthly cost, income level, waitlist status, and program quality to highlight where access is limited and where resources are needed.
 
 The project includes a full Tkinter-based GUI, CRUD functionality across all tables, and five analytical queries.
