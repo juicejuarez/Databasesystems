@@ -157,7 +157,7 @@ The GUI will open with full CRUD and query options.
 
 If barriers.db does not exist, it will be created automatically the first time the program is run.
 
-Project Files + Folder Structure
+**Project Files + Folder Structure**
 
 Why needed: Shows organization and professionalism.
 
@@ -171,6 +171,36 @@ PROJECT FILES
 | `queries.py`       | Contains all SQL analytical functions            |
 | `test_crud.py`     | Automated CRUD test file                         |
 | `barriers.db`      | SQLite database file                             |
+
+**GUI Description / How the Interface Works **
+
+Why needed: Explains the user experience.
+
+**GRAPHICAL USER INTERFACE (GUI)**
+
+The Tkinter interface includes:
+
+ Program Management
+  - Create Program
+  - View all Programs
+  - Update Program Cost
+  - Delete Program
+
+ Zip Code Management
+  - Add Zip Code
+  - View Zip Codes
+  - Update Population
+  - Delete Zip Code
+
+ Analytical Queries
+  - Income Barrier Query
+  - Budget Search
+  - Quality Filter
+  - Waitlist Availability
+  - Geographic ZIP Search
+
+Output Display Section
+  - All results appear in the large text window on the right side
 
 
 
