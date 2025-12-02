@@ -95,7 +95,7 @@ The system uses four linked tables with foreign keys:
 CRUD FUNCTIONALITY
 -------------------------------------
 
-The application supports full Create, Read, Update, and Delete operations for every table.
+The application supports full Create, Read, Update, and Delete operations for two tables.
 
 Programs CRUD
 
@@ -112,17 +112,6 @@ Zip Code CRUD
 - Delete ZIP code
     - Protected by foreign keys (cannot delete if programs exist)
 
-Enrollment CRUD
-
-- Add enrollment details
-- Update availability status
-- Delete enrollment entry
-
-Reviews CRUD
-
-- Add reviews
-- Update star rating or review count
-- Delete review
 
 ANALYTICAL QUERIES
 -------------------------------------
